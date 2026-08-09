@@ -1,16 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { formatDisplayDate, formatShortDate } from "@/lib/dates";
 import {
   DRINK_TYPES,
-  drinkTypeLabel,
   formatRatio,
   sortRecipesNewestFirst,
-  tasteLabel,
   uniqueBeanBrands,
 } from "@/lib/recipes";
-import { tasteBodyLabel, tasteResultLabel, TASTE_RESULTS } from "@/lib/taste";
+import { tasteResultLabel, TASTE_RESULTS } from "@/lib/taste";
 import { useCare } from "@/lib/store";
 import type { DrinkType, EspressoRecipe, TasteResult } from "@/lib/types";
 
@@ -18,6 +15,19 @@ type RecipeTableProps = {
   onEdit: (recipe: EspressoRecipe) => void;
   onRefine: (recipe: EspressoRecipe) => void;
 };
+
+function tasteTone(result: TasteResult | null) {
+  if (result === "balanced") {
+    return "bg-[color-mix(in_oklab,var(--ok)_7%,white)]";
+  }
+  if (result === "bitter" || result === "harsh_astringent") {
+    return "bg-[color-mix(in_oklab,var(--danger)_6%,white)]";
+  }
+  if (result === "sour" || result === "weak_watery" || result === "hollow") {
+    return "bg-[color-mix(in_oklab,var(--warn)_6%,white)]";
+  }
+  return "";
+}
 
 export function RecipeTable({ onEdit, onRefine }: RecipeTableProps) {
   const { hydrated, state, deleteRecipe, toggleFavoriteRecipe } = useCare();
@@ -30,6 +40,15 @@ export function RecipeTable({ onEdit, onRefine }: RecipeTableProps) {
     () => uniqueBeanBrands(state.recipes),
     [state.recipes],
   );
+
+  const shotNumberById = useMemo(() => {
+    const chronological = [...state.recipes].sort((a, b) => {
+      const byDate = a.shotDate.localeCompare(b.shotDate);
+      if (byDate !== 0) return byDate;
+      return a.createdAt.localeCompare(b.createdAt);
+    });
+    return new Map(chronological.map((recipe, index) => [recipe.id, index + 1]));
+  }, [state.recipes]);
 
   const recipes = useMemo(() => {
     return sortRecipesNewestFirst(state.recipes).filter((recipe) => {
@@ -54,12 +73,12 @@ export function RecipeTable({ onEdit, onRefine }: RecipeTableProps) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.16em] text-steam">
-            Comparison table
+            Shot log
           </p>
-          <h2 className="display mt-1 text-3xl text-ink">Recipe recordings</h2>
+          <h2 className="display mt-1 text-3xl text-ink">Recipe table</h2>
           <p className="mt-2 max-w-2xl text-sm text-ink-soft">
-            Compare grind, dose, yield, time, temperature, and taste side by
-            side to see which changes move the cup.
+            Each row is one shot — compare grind, dose in/out, ratio, time, and
+            taste at a glance.
           </p>
         </div>
         <p className="text-sm text-steam">
@@ -121,165 +140,70 @@ export function RecipeTable({ onEdit, onRefine }: RecipeTableProps) {
 
       {recipes.length === 0 ? (
         <div className="mt-6 rounded-2xl border border-dashed border-[var(--line)] px-4 py-8 text-sm text-ink-soft">
-          No recordings match these filters. Log a shot and select a taste
-          result to start building the comparison table.
+          No recordings yet. Tap Log a shot, pull a cup, and pick a taste result
+          to fill this table.
         </div>
       ) : (
-        <>
-          <div className="mt-6 space-y-3 md:hidden">
-            {recipes.map((recipe, index) => (
-              <article
-                key={recipe.id}
-                className="rounded-2xl border border-[var(--line)] bg-paper/50 p-4"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.12em] text-steam">
-                      #{recipes.length - index} ·{" "}
-                      {formatShortDate(recipe.shotDate)}
-                    </p>
-                    <h3 className="mt-1 text-lg font-semibold text-ink">
-                      {drinkTypeLabel(recipe.drinkType)}
-                    </h3>
-                    <p className="text-sm text-ink-soft">{recipe.beanBrand}</p>
-                  </div>
-                  <div className="text-right text-sm">
-                    <p className="font-medium text-ink">
-                      {tasteResultLabel(recipe.tasteResult)}
-                    </p>
-                    <p className="text-steam">
-                      {recipe.tasteScore ? `${recipe.tasteScore}/5` : "—"}
-                    </p>
-                  </div>
-                </div>
-                <dl className="mt-3 grid grid-cols-3 gap-2 text-sm">
-                  <div>
-                    <dt className="text-steam">Grind</dt>
-                    <dd className="font-medium text-ink">{recipe.grindSetting}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-steam">In→Out</dt>
-                    <dd className="font-medium text-ink">
-                      {recipe.doseGrams}→{recipe.yieldGrams}g
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-steam">Ratio</dt>
-                    <dd className="font-medium text-ink">
-                      {formatRatio(recipe.doseGrams, recipe.yieldGrams)}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-steam">Time</dt>
-                    <dd className="font-medium text-ink">
-                      {recipe.brewTimeSeconds}s
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-steam">Temp</dt>
-                    <dd className="font-medium text-ink">
-                      {recipe.brewTempC != null ? `${recipe.brewTempC}°C` : "—"}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-steam">Body</dt>
-                    <dd className="font-medium text-ink">
-                      {tasteBodyLabel(recipe.tasteBody)}
-                    </dd>
-                  </div>
-                </dl>
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => onRefine(recipe)}
-                    className="min-h-11 rounded-xl bg-ink text-sm font-medium text-paper"
-                  >
-                    Refine
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onEdit(recipe)}
-                    className="min-h-11 rounded-xl border border-[var(--line)] text-sm text-ink-soft"
-                  >
-                    Edit
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          <div className="mt-6 hidden overflow-x-auto md:block">
-            <table className="min-w-[1100px] w-full border-collapse text-left text-sm">
-              <thead>
-                <tr className="border-b border-[var(--line)] text-xs uppercase tracking-[0.12em] text-steam">
-                  <th className="px-3 py-3 font-medium">Date</th>
-                  <th className="px-3 py-3 font-medium">Drink</th>
-                  <th className="px-3 py-3 font-medium">Beans</th>
-                  <th className="px-3 py-3 font-medium">Grind</th>
-                  <th className="px-3 py-3 font-medium">Dose</th>
-                  <th className="px-3 py-3 font-medium">Yield</th>
-                  <th className="px-3 py-3 font-medium">Ratio</th>
-                  <th className="px-3 py-3 font-medium">Time</th>
-                  <th className="px-3 py-3 font-medium">Temp</th>
-                  <th className="px-3 py-3 font-medium">Taste</th>
-                  <th className="px-3 py-3 font-medium">Body</th>
-                  <th className="px-3 py-3 font-medium">Score</th>
-                  <th className="px-3 py-3 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recipes.map((recipe) => (
+        <div className="mt-6 overflow-x-auto rounded-2xl border border-[var(--line)]">
+          <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+            <thead>
+              <tr className="border-b border-[var(--line)] bg-[color-mix(in_oklab,var(--paper)_80%,white)]">
+                <th className="sticky left-0 z-10 bg-[color-mix(in_oklab,var(--paper)_80%,white)] px-3 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-steam">
+                  #
+                </th>
+                <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-steam">
+                  Grind
+                </th>
+                <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-steam">
+                  In → Out
+                </th>
+                <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-steam">
+                  Ratio
+                </th>
+                <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-steam">
+                  Time
+                </th>
+                <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-steam">
+                  Taste
+                </th>
+                <th className="px-3 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-steam">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {recipes.map((recipe) => {
+                const shotNumber = shotNumberById.get(recipe.id) ?? "—";
+                return (
                   <tr
                     key={recipe.id}
-                    className={`border-b border-[var(--line)] align-top ${
-                      recipe.tasteResult === "bitter" ||
-                      recipe.tasteResult === "harsh_astringent"
-                        ? "bg-[color-mix(in_oklab,var(--danger)_4%,white)]"
-                        : recipe.tasteResult === "balanced"
-                          ? "bg-[color-mix(in_oklab,var(--ok)_5%,white)]"
-                          : ""
-                    }`}
+                    className={`border-b border-[var(--line)] last:border-b-0 ${tasteTone(recipe.tasteResult)}`}
                   >
-                    <td className="px-3 py-3 whitespace-nowrap text-ink-soft">
-                      {formatDisplayDate(recipe.shotDate)}
+                    <td className="sticky left-0 z-10 bg-white px-3 py-3.5 font-semibold text-ink">
+                      {shotNumber}
                       {recipe.favorite ? (
-                        <div className="text-xs text-copper">Favorite</div>
+                        <span className="ml-1 text-copper" title="Favorite">
+                          ★
+                        </span>
                       ) : null}
                     </td>
-                    <td className="px-3 py-3 font-medium text-ink">
-                      {drinkTypeLabel(recipe.drinkType)}
+                    <td className="px-3 py-3.5 font-medium text-ink">
+                      {recipe.grindSetting || "—"}
                     </td>
-                    <td className="px-3 py-3">
-                      <div className="font-medium text-ink">{recipe.beanBrand}</div>
-                      {recipe.beanName ? (
-                        <div className="text-xs text-steam">{recipe.beanName}</div>
-                      ) : null}
+                    <td className="px-3 py-3.5 whitespace-nowrap text-ink">
+                      {recipe.doseGrams}g → {recipe.yieldGrams}g
                     </td>
-                    <td className="px-3 py-3 font-medium text-ink">
-                      {recipe.grindSetting}
-                    </td>
-                    <td className="px-3 py-3">{recipe.doseGrams}g</td>
-                    <td className="px-3 py-3">{recipe.yieldGrams}g</td>
-                    <td className="px-3 py-3">
+                    <td className="px-3 py-3.5 whitespace-nowrap text-ink">
                       {formatRatio(recipe.doseGrams, recipe.yieldGrams)}
                     </td>
-                    <td className="px-3 py-3">{recipe.brewTimeSeconds}s</td>
-                    <td className="px-3 py-3">
-                      {recipe.brewTempC != null ? `${recipe.brewTempC}°C` : "—"}
+                    <td className="px-3 py-3.5 whitespace-nowrap text-ink">
+                      {recipe.brewTimeSeconds}s
                     </td>
-                    <td className="px-3 py-3 font-medium text-ink">
+                    <td className="px-3 py-3.5 font-medium text-ink">
                       {tasteResultLabel(recipe.tasteResult)}
                     </td>
-                    <td className="px-3 py-3">
-                      {tasteBodyLabel(recipe.tasteBody)}
-                    </td>
-                    <td className="px-3 py-3">
-                      {recipe.tasteScore
-                        ? `${recipe.tasteScore} · ${tasteLabel(recipe.tasteScore)}`
-                        : "—"}
-                    </td>
-                    <td className="px-3 py-3">
-                      <div className="flex flex-col gap-1.5">
+                    <td className="px-3 py-3.5">
+                      <div className="flex flex-wrap gap-1.5">
                         <button
                           type="button"
                           onClick={() => onRefine(recipe)}
@@ -319,11 +243,11 @@ export function RecipeTable({ onEdit, onRefine }: RecipeTableProps) {
                       </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
     </section>
   );
