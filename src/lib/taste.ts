@@ -48,6 +48,20 @@ export function tasteResultLabel(value: TasteResult | null | undefined): string 
   return TASTE_RESULTS.find((item) => item.id === value)?.label ?? value;
 }
 
+/** Compact labels for dense tables and mobile shot logs. */
+export function shortTasteLabel(value: TasteResult | null | undefined): string {
+  if (!value) return "—";
+  const labels: Record<TasteResult, string> = {
+    balanced: "Balanced",
+    bitter: "Bitter",
+    sour: "Sour",
+    weak_watery: "Weak",
+    harsh_astringent: "Harsh",
+    hollow: "Hollow",
+  };
+  return labels[value];
+}
+
 export function tasteBodyLabel(value: TasteBody | null | undefined): string {
   if (!value) return "—";
   return TASTE_BODIES.find((item) => item.id === value)?.label ?? value;
