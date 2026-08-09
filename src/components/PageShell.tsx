@@ -32,7 +32,7 @@ export function PageShell({
         </Link>
       ) : null}
 
-      <header className="flex flex-col gap-5 border-b border-[var(--line)] pb-8 sm:flex-row sm:items-end sm:justify-between">
+      <header className="flex flex-col gap-5 border-b border-[var(--line)] pb-8">
         <div className="max-w-2xl">
           {eyebrow ? (
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-steam">
@@ -48,7 +48,7 @@ export function PageShell({
             </p>
           ) : null}
         </div>
-        {actions ? <div className="shrink-0">{actions}</div> : null}
+        {actions ? <div className="w-full sm:w-auto">{actions}</div> : null}
       </header>
 
       <div className="pt-8">{children}</div>

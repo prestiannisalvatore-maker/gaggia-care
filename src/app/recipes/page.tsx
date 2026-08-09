@@ -83,7 +83,7 @@ export default function RecipesPage() {
       actions={
         <a
           href="#recipe-form"
-          className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-ink px-4 text-sm font-medium text-paper"
+          className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-ink px-4 text-sm font-medium text-paper sm:w-auto"
         >
           Log a shot
         </a>
