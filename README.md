@@ -26,9 +26,11 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Deploy to Vercel
 
-1. Push this repository to GitHub.
-2. Import the project in [Vercel](https://vercel.com/new).
-3. Use the default Next.js settings and deploy.
+Production: [https://gaggia-care.vercel.app](https://gaggia-care.vercel.app)
+
+GitHub: [prestiannisalvatore-maker/gaggia-care](https://github.com/prestiannisalvatore-maker/gaggia-care)
+
+This repo is connected to the Vercel project `gaggia-care`. Pushes to `main` trigger production deployments.
 
 No environment variables are required for the current local-storage build.
 
