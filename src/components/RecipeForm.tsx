@@ -2,12 +2,15 @@
 
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { DRINK_TYPES, drinkTypeLabel, formatRatio } from "@/lib/recipes";
+import { TASTE_BODIES, TASTE_RESULTS } from "@/lib/taste";
 import { todayISO } from "@/lib/dates";
 import { useCare } from "@/lib/store";
 import type {
   DrinkType,
   EspressoRecipe,
   EspressoRecipeInput,
+  TasteBody,
+  TasteResult,
   TasteScore,
 } from "@/lib/types";
 
@@ -26,6 +29,8 @@ export function emptyRecipeForm(): EspressoRecipeInput {
     steamTempC: null,
     pidNotes: "",
     tasteScore: null,
+    tasteResult: null,
+    tasteBody: null,
     tasteNotes: "",
     prepNotes: "",
     basedOnId: null,
@@ -48,7 +53,9 @@ export function recipeToInput(recipe: EspressoRecipe): EspressoRecipeInput {
     steamTempC: recipe.steamTempC ?? null,
     pidNotes: recipe.pidNotes ?? "",
     tasteScore: recipe.tasteScore,
-    tasteNotes: recipe.tasteNotes,
+    tasteResult: recipe.tasteResult ?? null,
+    tasteBody: recipe.tasteBody ?? null,
+    tasteNotes: recipe.tasteNotes ?? "",
     prepNotes: recipe.prepNotes,
     basedOnId: recipe.basedOnId,
     favorite: recipe.favorite,
@@ -61,11 +68,11 @@ export function refineFromRecipe(recipe: EspressoRecipe): EspressoRecipeInput {
     shotDate: todayISO(),
     basedOnId: recipe.id,
     tasteScore: null,
+    tasteResult: null,
+    tasteBody: null,
     tasteNotes: "",
     favorite: false,
-    prepNotes: recipe.prepNotes
-      ? `Refined from prior shot. Previous prep: ${recipe.prepNotes}`
-      : "Refined from prior shot — adjust one variable at a time.",
+    prepNotes: `Refined from prior ${drinkTypeLabel(recipe.drinkType)} shot. Change one variable, then pick the taste result.`,
   };
 }
 
@@ -101,7 +108,7 @@ export function RecipeForm({
       ? "Edit recording"
       : mode === "refine"
         ? "Refine experiment"
-        : "New espresso recording";
+        : "Log a shot";
 
   function update<K extends keyof EspressoRecipeInput>(
     key: K,
@@ -115,7 +122,7 @@ export function RecipeForm({
     setError(null);
 
     if (!form.beanBrand.trim()) {
-      setError("Add the coffee bean brand so you can compare later.");
+      setError("Add the coffee bean brand so analysis can compare like-for-like.");
       return;
     }
     if (!form.grindSetting.trim()) {
@@ -126,7 +133,10 @@ export function RecipeForm({
       setError("Dose, yield, and brew time must be greater than zero.");
       return;
     }
-
+    if (!form.tasteResult) {
+      setError("Select how the coffee tasted — that drives the dialling coach.");
+      return;
+    }
     if (form.brewTempC != null && (form.brewTempC < 70 || form.brewTempC > 130)) {
       setError("Brew water temperature should be between 70°C and 130°C.");
       return;
@@ -145,7 +155,7 @@ export function RecipeForm({
       beanName: form.beanName.trim(),
       grindSetting: form.grindSetting.trim(),
       pidNotes: form.pidNotes.trim(),
-      tasteNotes: form.tasteNotes.trim(),
+      tasteNotes: "",
       prepNotes: form.prepNotes.trim(),
     };
 
@@ -159,18 +169,19 @@ export function RecipeForm({
 
   return (
     <form
+      id="recipe-form"
       onSubmit={handleSubmit}
-      className="rounded-[28px] border border-[var(--line)] bg-white/70 p-6 shadow-[var(--shadow)] sm:p-8"
+      className="rounded-3xl border border-[var(--line)] bg-white p-5 sm:p-6"
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-steam">
-            Dialling log
+          <p className="text-xs uppercase tracking-[0.16em] text-steam">
+            New recording
           </p>
-          <h2 className="display mt-2 text-3xl text-espresso">{modeLabel}</h2>
+          <h2 className="display mt-1 text-3xl text-ink">{modeLabel}</h2>
           <p className="mt-2 max-w-2xl text-sm text-ink-soft">
-            Record grind, dose, brew time, yield, and PID temperatures when you
-            have them. Change one variable at a time when refining.
+            Log variables, then choose the taste result. The coach uses that to
+            suggest the next change.
           </p>
         </div>
         <p className="text-sm text-steam">
@@ -179,19 +190,17 @@ export function RecipeForm({
       </div>
 
       {mode === "refine" && sourceRecipe ? (
-        <p className="mt-4 rounded-2xl bg-[color-mix(in_oklab,var(--copper)_12%,white)] px-4 py-3 text-sm text-ink-soft">
-          Starting from {drinkTypeLabel(sourceRecipe.drinkType)} ·{" "}
-          {sourceRecipe.beanBrand}
-          {sourceRecipe.beanName ? ` · ${sourceRecipe.beanName}` : ""} · grind{" "}
-          {sourceRecipe.grindSetting} · {sourceRecipe.doseGrams}g in /{" "}
-          {sourceRecipe.yieldGrams}g out · {sourceRecipe.brewTimeSeconds}s
-          {sourceRecipe.brewTempC != null
-            ? ` · ${sourceRecipe.brewTempC}°C brew`
+        <p className="mt-4 rounded-2xl bg-paper px-4 py-3 text-sm text-ink-soft">
+          Starting from {drinkTypeLabel(sourceRecipe.drinkType)} · grind{" "}
+          {sourceRecipe.grindSetting} · {sourceRecipe.doseGrams}g →{" "}
+          {sourceRecipe.yieldGrams}g · {sourceRecipe.brewTimeSeconds}s
+          {sourceRecipe.tasteResult
+            ? ` · was ${TASTE_RESULTS.find((item) => item.id === sourceRecipe.tasteResult)?.label}`
             : ""}
         </p>
       ) : null}
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <Field label="Drink type" htmlFor="drinkType">
           <select
             id="drinkType"
@@ -226,7 +235,7 @@ export function RecipeForm({
             id="beanBrand"
             list="bean-brands"
             required
-            placeholder="e.g. Market Lane, Ona, local roaster"
+            placeholder="e.g. Market Lane, Ona"
             value={form.beanBrand}
             onChange={(event) => update("beanBrand", event.target.value)}
             className={inputClass}
@@ -241,9 +250,20 @@ export function RecipeForm({
         <Field label="Coffee / lot name" htmlFor="beanName">
           <input
             id="beanName"
-            placeholder="Optional — blend or single origin name"
+            placeholder="Optional"
             value={form.beanName}
             onChange={(event) => update("beanName", event.target.value)}
+            className={inputClass}
+          />
+        </Field>
+
+        <Field label="HiBREW 5G grind setting" htmlFor="grindSetting">
+          <input
+            id="grindSetting"
+            required
+            placeholder="e.g. 12 or 3.5"
+            value={form.grindSetting}
+            onChange={(event) => update("grindSetting", event.target.value)}
             className={inputClass}
           />
         </Field>
@@ -258,41 +278,7 @@ export function RecipeForm({
           />
         </Field>
 
-        <Field label="HiBREW 5G grind setting" htmlFor="grindSetting">
-          <input
-            id="grindSetting"
-            required
-            placeholder="e.g. 12, 3.5, or your dial mark"
-            value={form.grindSetting}
-            onChange={(event) => update("grindSetting", event.target.value)}
-            className={inputClass}
-          />
-        </Field>
-
-        <Field label="Taste score" htmlFor="tasteScore">
-          <select
-            id="tasteScore"
-            value={form.tasteScore ?? ""}
-            onChange={(event) =>
-              update(
-                "tasteScore",
-                event.target.value
-                  ? (Number(event.target.value) as TasteScore)
-                  : null,
-              )
-            }
-            className={inputClass}
-          >
-            <option value="">Not rated yet</option>
-            <option value="1">1 · Poor</option>
-            <option value="2">2 · OK</option>
-            <option value="3">3 · Good</option>
-            <option value="4">4 · Great</option>
-            <option value="5">5 · Superb</option>
-          </select>
-        </Field>
-
-        <Field label="Dose (bean weight, g)" htmlFor="doseGrams">
+        <Field label="Dose (g in)" htmlFor="doseGrams">
           <input
             id="doseGrams"
             type="number"
@@ -307,7 +293,7 @@ export function RecipeForm({
           />
         </Field>
 
-        <Field label="Yield (espresso weight, g)" htmlFor="yieldGrams">
+        <Field label="Yield (g out)" htmlFor="yieldGrams">
           <input
             id="yieldGrams"
             type="number"
@@ -337,29 +323,94 @@ export function RecipeForm({
           />
         </Field>
 
-        <label className="flex items-center gap-3 self-end pb-3 text-sm text-ink-soft">
-          <input
-            type="checkbox"
-            checked={form.favorite}
-            onChange={(event) => update("favorite", event.target.checked)}
-            className="h-4 w-4 accent-[var(--ink)]"
-          />
-          Mark as a keeper / favorite
-        </label>
+        <Field label="Overall score" htmlFor="tasteScore">
+          <select
+            id="tasteScore"
+            value={form.tasteScore ?? ""}
+            onChange={(event) =>
+              update(
+                "tasteScore",
+                event.target.value
+                  ? (Number(event.target.value) as TasteScore)
+                  : null,
+              )
+            }
+            className={inputClass}
+          >
+            <option value="">Not scored</option>
+            <option value="1">1 · Poor</option>
+            <option value="2">2 · OK</option>
+            <option value="3">3 · Good</option>
+            <option value="4">4 · Great</option>
+            <option value="5">5 · Superb</option>
+          </select>
+        </Field>
       </div>
 
-      <div className="mt-8 rounded-2xl border border-[var(--line)] bg-paper/80 p-4 sm:p-5">
-        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.16em] text-steam">
-              PID temperatures
-            </p>
-            <p className="mt-1 text-sm text-ink-soft">
-              Optional until your PID is installed. Leave blank for now, then
-              log brew water temperature on each shot.
-            </p>
-          </div>
+      <div className="mt-6 rounded-2xl border border-[var(--line)] bg-paper/70 p-4 sm:p-5">
+        <p className="text-xs uppercase tracking-[0.16em] text-steam">
+          Taste result
+        </p>
+        <p className="mt-1 text-sm text-ink-soft">
+          Pick the clearest description of the cup. This is what powers
+          suggestions.
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <Field label="How did it taste?" htmlFor="tasteResult">
+            <select
+              id="tasteResult"
+              required
+              value={form.tasteResult ?? ""}
+              onChange={(event) =>
+                update(
+                  "tasteResult",
+                  event.target.value
+                    ? (event.target.value as TasteResult)
+                    : null,
+                )
+              }
+              className={inputClass}
+            >
+              <option value="">Select taste result</option>
+              {TASTE_RESULTS.map((taste) => (
+                <option key={taste.id} value={taste.id}>
+                  {taste.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Body" htmlFor="tasteBody">
+            <select
+              id="tasteBody"
+              value={form.tasteBody ?? ""}
+              onChange={(event) =>
+                update(
+                  "tasteBody",
+                  event.target.value ? (event.target.value as TasteBody) : null,
+                )
+              }
+              className={inputClass}
+            >
+              <option value="">Optional</option>
+              {TASTE_BODIES.map((body) => (
+                <option key={body.id} value={body.id}>
+                  {body.label}
+                </option>
+              ))}
+            </select>
+          </Field>
         </div>
+        {form.tasteResult ? (
+          <p className="mt-3 text-sm text-ink-soft">
+            {TASTE_RESULTS.find((item) => item.id === form.tasteResult)?.hint}
+          </p>
+        ) : null}
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-[var(--line)] bg-paper/70 p-4 sm:p-5">
+        <p className="text-xs uppercase tracking-[0.16em] text-steam">
+          PID temperatures
+        </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label="Brew water temp (°C)" htmlFor="brewTempC">
             <input
@@ -368,7 +419,7 @@ export function RecipeForm({
               min={70}
               max={130}
               step={0.1}
-              placeholder="e.g. 93.0"
+              placeholder="Optional until PID"
               value={form.brewTempC ?? ""}
               onChange={(event) =>
                 update(
@@ -401,61 +452,48 @@ export function RecipeForm({
               className={inputClass}
             />
           </Field>
-          <div className="sm:col-span-2">
-            <Field label="PID notes" htmlFor="pidNotes">
-              <input
-                id="pidNotes"
-                placeholder="Offset, probe location, brew vs idle setpoint…"
-                value={form.pidNotes}
-                onChange={(event) => update("pidNotes", event.target.value)}
-                className={inputClass}
-              />
-            </Field>
-          </div>
         </div>
       </div>
 
-      <div className="mt-4 grid gap-4">
-        <Field label="Taste notes" htmlFor="tasteNotes">
-          <textarea
-            id="tasteNotes"
-            rows={3}
-            placeholder="Sour, bitter, sweet, thin, syrupy, chocolate, citrus…"
-            value={form.tasteNotes}
-            onChange={(event) => update("tasteNotes", event.target.value)}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="Prep & experiment notes" htmlFor="prepNotes">
-          <textarea
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <Field label="What you changed (optional)" htmlFor="prepNotes">
+          <input
             id="prepNotes"
-            rows={3}
-            placeholder="WDT, distribution, tamp, what you changed from the last shot…"
+            placeholder="e.g. Coarser by 0.5 from last shot"
             value={form.prepNotes}
             onChange={(event) => update("prepNotes", event.target.value)}
             className={inputClass}
           />
         </Field>
+        <label className="flex items-center gap-3 self-end pb-3 text-sm text-ink-soft">
+          <input
+            type="checkbox"
+            checked={form.favorite}
+            onChange={(event) => update("favorite", event.target.checked)}
+            className="h-4 w-4 accent-[var(--ink)]"
+          />
+          Mark as a keeper
+        </label>
       </div>
 
       {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
 
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <button
           type="submit"
-          className="min-h-12 rounded-xl bg-ink px-5 py-3 text-sm font-medium text-paper transition hover:bg-copper-deep"
+          className="min-h-12 rounded-xl bg-ink px-5 text-sm font-medium text-paper"
         >
           {mode === "edit"
             ? "Save changes"
             : mode === "refine"
-              ? "Save refined shot"
+              ? "Save experiment"
               : "Save recording"}
         </button>
         {mode !== "new" ? (
           <button
             type="button"
             onClick={onDone}
-            className="min-h-12 rounded-full border border-[var(--line)] px-5 py-3 text-sm text-ink-soft transition hover:bg-mist/60"
+            className="min-h-12 rounded-xl border border-[var(--line)] px-5 text-sm text-ink-soft"
           >
             Cancel
           </button>
@@ -476,11 +514,11 @@ function Field({
 }) {
   return (
     <label className="block text-sm" htmlFor={htmlFor}>
-      <span className="font-medium text-espresso">{label}</span>
+      <span className="font-medium text-ink">{label}</span>
       <div className="mt-2">{children}</div>
     </label>
   );
 }
 
 const inputClass =
-  "min-h-12 w-full rounded-2xl border border-[var(--line)] bg-paper px-4 py-3 text-ink outline-none transition focus:border-copper";
+  "min-h-12 w-full rounded-xl border border-[var(--line)] bg-white px-4 py-3 text-ink outline-none transition focus:border-copper";

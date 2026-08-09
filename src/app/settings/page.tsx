@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PageIntro } from "@/components/PageIntro";
+import { PageShell } from "@/components/PageShell";
 import { ensureNotificationPermission } from "@/lib/reminders";
 import { useCare } from "@/lib/store";
 
@@ -16,16 +16,16 @@ export default function SettingsPage() {
   const [permission, setPermission] = useState<string>("unknown");
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
-      <PageIntro
-        eyebrow="Reminders & data"
-        title="Stay ahead of scale and milk"
-        description="Enable browser notifications so this device can nudge you when descaling or weekly cleans are due. Progress is stored locally in your browser."
-      />
-
-      <section className="fade-up-delay mt-10 space-y-8 rounded-[28px] border border-[var(--line)] bg-white/70 p-6 shadow-[var(--shadow)] sm:p-8">
+    <PageShell
+      eyebrow="Guide"
+      title="Reminders & data"
+      description="Browser nudges when care is due. Everything stays on this device."
+      backHref="/guides"
+      backLabel="All guides"
+    >
+      <section className="space-y-8 rounded-[1.75rem] border border-[var(--line)] bg-white p-6 sm:p-8">
         <div>
-          <label className="text-sm font-medium text-espresso" htmlFor="purchase">
+          <label className="text-sm font-medium text-ink" htmlFor="purchase">
             Machine purchase date
           </label>
           <p className="mt-1 text-sm text-ink-soft">
@@ -43,9 +43,7 @@ export default function SettingsPage() {
         <div className="border-t border-[var(--line)] pt-8">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-espresso">
-                Browser reminders
-              </p>
+              <p className="text-sm font-medium text-ink">Browser reminders</p>
               <p className="mt-1 text-sm text-ink-soft">
                 Shows a notification when tasks are overdue or due soon.
               </p>
@@ -58,7 +56,7 @@ export default function SettingsPage() {
                 updateReminders({ enabled: !state.reminders.enabled })
               }
               className={`relative h-8 w-14 rounded-full transition ${
-                state.reminders.enabled ? "bg-espresso" : "bg-mist"
+                state.reminders.enabled ? "bg-ink" : "bg-mist"
               }`}
             >
               <span
@@ -69,7 +67,10 @@ export default function SettingsPage() {
             </button>
           </div>
 
-          <label className="mt-6 block text-sm font-medium text-espresso" htmlFor="daysBefore">
+          <label
+            className="mt-6 block text-sm font-medium text-ink"
+            htmlFor="daysBefore"
+          >
             Remind me this many days before due
           </label>
           <input
@@ -88,7 +89,7 @@ export default function SettingsPage() {
 
           <button
             type="button"
-            className="mt-6 rounded-full border border-[var(--line)] px-5 py-3 text-sm font-medium transition hover:bg-mist/60"
+            className="mt-6 rounded-2xl border border-[var(--line)] px-5 py-3 text-sm font-medium transition hover:bg-paper"
             onClick={async () => {
               const result = await ensureNotificationPermission();
               setPermission(result);
@@ -105,7 +106,7 @@ export default function SettingsPage() {
         </div>
 
         <div className="border-t border-[var(--line)] pt-8">
-          <label className="text-sm font-medium text-espresso" htmlFor="notes">
+          <label className="text-sm font-medium text-ink" htmlFor="notes">
             Personal notes
           </label>
           <textarea
@@ -119,7 +120,7 @@ export default function SettingsPage() {
         </div>
 
         <div className="border-t border-[var(--line)] pt-8">
-          <p className="text-sm font-medium text-espresso">Reset local data</p>
+          <p className="text-sm font-medium text-ink">Reset local data</p>
           <p className="mt-1 text-sm text-ink-soft">
             Clears completions, notes, and reminder settings on this browser.
           </p>
@@ -134,12 +135,12 @@ export default function SettingsPage() {
                 resetAll();
               }
             }}
-            className="mt-4 rounded-full border border-danger/30 px-5 py-3 text-sm font-medium text-danger transition hover:bg-danger/5"
+            className="mt-4 rounded-2xl border border-danger/30 px-5 py-3 text-sm font-medium text-danger transition hover:bg-danger/5"
           >
             Reset everything
           </button>
         </div>
       </section>
-    </div>
+    </PageShell>
   );
 }

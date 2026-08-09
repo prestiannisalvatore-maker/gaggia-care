@@ -32,6 +32,16 @@ export type ReminderSettings = {
 
 export type TasteScore = 1 | 2 | 3 | 4 | 5;
 
+export type TasteResult =
+  | "balanced"
+  | "bitter"
+  | "sour"
+  | "weak_watery"
+  | "harsh_astringent"
+  | "hollow";
+
+export type TasteBody = "thin" | "medium" | "syrupy";
+
 export type DrinkType =
   | "espresso"
   | "ristretto"
@@ -65,6 +75,10 @@ export type EspressoRecipe = {
   /** PID offset or probe notes, e.g. “+1.5 °C offset”. */
   pidNotes: string;
   tasteScore: TasteScore | null;
+  /** Structured cup result used for dialling analysis */
+  tasteResult: TasteResult | null;
+  tasteBody: TasteBody | null;
+  /** @deprecated Kept for older local recordings; prefer tasteResult */
   tasteNotes: string;
   prepNotes: string;
   /** Set when this shot was refined from an earlier recording */

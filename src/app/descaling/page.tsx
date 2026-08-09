@@ -1,40 +1,30 @@
-import Link from "next/link";
 import { DescaleCompleteButton } from "@/components/DescaleCompleteButton";
 import { ManualReference } from "@/components/ManualReference";
-import { PageIntro } from "@/components/PageIntro";
+import { PageShell } from "@/components/PageShell";
 import { DESCALING_GUIDE } from "@/data/descaling";
 
 export default function DescalingPage() {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
-      <PageIntro
-        eyebrow="Primary maintenance"
-        title={DESCALING_GUIDE.title}
-        description={DESCALING_GUIDE.intro}
-      />
-
-      <p className="fade-up-delay mt-4 max-w-3xl text-sm text-ink-soft">
+    <PageShell
+      eyebrow="Guide"
+      title={DESCALING_GUIDE.title}
+      description={DESCALING_GUIDE.intro}
+      backHref="/guides"
+      backLabel="All guides"
+      actions={<DescaleCompleteButton />}
+    >
+      <p className="max-w-3xl text-sm text-ink-soft">
         {DESCALING_GUIDE.intervalNote}
       </p>
 
-      <div className="fade-up-delay mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-        <DescaleCompleteButton />
-        <Link
-          href="/maintenance"
-          className="inline-flex min-h-12 items-center justify-center rounded-full border border-[var(--line)] px-5 py-3 text-sm font-medium text-ink-soft transition hover:bg-mist/60"
-        >
-          Back to calendar
-        </Link>
+      <div className="mt-6">
+        <ManualReference variant="compact" />
       </div>
 
-      <div className="mt-8">
-        <ManualReference />
-      </div>
-
-      <section className="mt-12 grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+      <section className="mt-10 grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="space-y-6">
-          <div className="rounded-[28px] border border-[var(--line)] bg-white/70 p-6">
-            <h2 className="display text-3xl text-espresso">You will need</h2>
+          <div className="rounded-[1.75rem] border border-[var(--line)] bg-white p-6">
+            <h2 className="display text-3xl text-ink">You will need</h2>
             <ul className="mt-4 space-y-2 text-sm leading-relaxed text-ink-soft">
               {DESCALING_GUIDE.supplies.map((item) => (
                 <li key={item} className="flex gap-3">
@@ -45,8 +35,8 @@ export default function DescalingPage() {
             </ul>
           </div>
 
-          <div className="rounded-[28px] border border-danger/20 bg-[color-mix(in_oklab,var(--danger)_8%,white)] p-6">
-            <h2 className="display text-3xl text-espresso">Before you start</h2>
+          <div className="rounded-[1.75rem] border border-danger/20 bg-[color-mix(in_oklab,var(--danger)_8%,white)] p-6">
+            <h2 className="display text-3xl text-ink">Before you start</h2>
             <ul className="mt-4 space-y-2 text-sm leading-relaxed text-ink-soft">
               {DESCALING_GUIDE.warnings.map((item) => (
                 <li key={item}>{item}</li>
@@ -56,7 +46,7 @@ export default function DescalingPage() {
         </div>
 
         <div>
-          <h2 className="display text-3xl text-espresso">The process</h2>
+          <h2 className="display text-3xl text-ink">The process</h2>
           <ol className="mt-6 space-y-6">
             {DESCALING_GUIDE.steps.map((step, index) => (
               <li key={step.title} className="grid grid-cols-[auto_1fr] gap-4">
@@ -64,9 +54,7 @@ export default function DescalingPage() {
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <div className="border-b border-[var(--line)] pb-6">
-                  <h3 className="text-xl font-medium text-espresso">
-                    {step.title}
-                  </h3>
+                  <h3 className="text-xl font-medium text-ink">{step.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-ink-soft">
                     {step.detail}
                   </p>
@@ -75,8 +63,8 @@ export default function DescalingPage() {
             ))}
           </ol>
 
-          <div className="mt-8 rounded-[28px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--paper-deep)_70%,white)] p-6">
-            <h3 className="display text-2xl text-espresso">Aftercare</h3>
+          <div className="mt-8 rounded-[1.75rem] border border-[var(--line)] bg-[color-mix(in_oklab,var(--paper-deep)_70%,white)] p-6">
+            <h3 className="display text-2xl text-ink">Aftercare</h3>
             <ul className="mt-3 space-y-2 text-sm leading-relaxed text-ink-soft">
               {DESCALING_GUIDE.aftercare.map((item) => (
                 <li key={item}>{item}</li>
@@ -85,6 +73,6 @@ export default function DescalingPage() {
           </div>
         </div>
       </section>
-    </div>
+    </PageShell>
   );
 }

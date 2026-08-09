@@ -12,6 +12,11 @@ import {
 import { createRecipeId, isDrinkType } from "@/lib/recipes";
 import { computeTasks } from "@/lib/schedule";
 import { todayISO } from "@/lib/dates";
+import {
+  inferTasteResultFromNotes,
+  isTasteBody,
+  isTasteResult,
+} from "@/lib/taste";
 import type {
   AppState,
   CompletionRecord,
@@ -66,15 +71,25 @@ function readStorage(): AppState {
         ...parsed.reminders,
       },
       completions: parsed.completions ?? [],
-      recipes: (parsed.recipes ?? []).map((recipe) => ({
-        ...recipe,
-        drinkType: isDrinkType(recipe.drinkType) ? recipe.drinkType : "espresso",
-        brewTempC:
-          typeof recipe.brewTempC === "number" ? recipe.brewTempC : null,
-        steamTempC:
-          typeof recipe.steamTempC === "number" ? recipe.steamTempC : null,
-        pidNotes: recipe.pidNotes ?? "",
-      })),
+      recipes: (parsed.recipes ?? []).map((recipe) => {
+        const tasteResult = isTasteResult(recipe.tasteResult)
+          ? recipe.tasteResult
+          : inferTasteResultFromNotes(recipe.tasteNotes ?? "");
+        return {
+          ...recipe,
+          drinkType: isDrinkType(recipe.drinkType)
+            ? recipe.drinkType
+            : "espresso",
+          brewTempC:
+            typeof recipe.brewTempC === "number" ? recipe.brewTempC : null,
+          steamTempC:
+            typeof recipe.steamTempC === "number" ? recipe.steamTempC : null,
+          pidNotes: recipe.pidNotes ?? "",
+          tasteResult,
+          tasteBody: isTasteBody(recipe.tasteBody) ? recipe.tasteBody : null,
+          tasteNotes: recipe.tasteNotes ?? "",
+        };
+      }),
     };
   } catch {
     return DEFAULT_STATE;

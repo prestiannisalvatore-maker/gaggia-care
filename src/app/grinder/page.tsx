@@ -1,32 +1,31 @@
 import Link from "next/link";
-import { PageIntro } from "@/components/PageIntro";
+import { PageShell } from "@/components/PageShell";
 import { GRINDER } from "@/data/grinder";
 
 export default function GrinderPage() {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
-      <PageIntro
-        eyebrow="Grinder"
-        title={GRINDER.name}
-        description={GRINDER.summary}
-      />
-
-      <div className="fade-up-delay mt-8">
+    <PageShell
+      eyebrow="Guide"
+      title={GRINDER.name}
+      description={GRINDER.summary}
+      backHref="/guides"
+      backLabel="All guides"
+      actions={
         <Link
           href="/maintenance"
-          className="text-sm font-medium text-copper underline decoration-copper/30 underline-offset-4"
+          className="inline-flex min-h-11 items-center rounded-2xl border border-[var(--line)] bg-white px-4 text-sm font-medium text-ink"
         >
-          Track grinder tasks on the schedule
+          Track in Care
         </Link>
-      </div>
-
-      <section className="mt-12 grid gap-6 lg:grid-cols-3">
+      }
+    >
+      <section className="grid gap-4 lg:grid-cols-3">
         {GRINDER.care.map((block) => (
           <div
             key={block.title}
-            className="rounded-[28px] border border-[var(--line)] bg-white/70 p-6"
+            className="rounded-[1.75rem] border border-[var(--line)] bg-white p-6"
           >
-            <h2 className="display text-3xl text-espresso">{block.title}</h2>
+            <h2 className="display text-3xl text-ink">{block.title}</h2>
             <ul className="mt-4 space-y-3 text-sm leading-relaxed text-ink-soft">
               {block.items.map((item) => (
                 <li key={item} className="flex gap-3">
@@ -39,8 +38,8 @@ export default function GrinderPage() {
         ))}
       </section>
 
-      <section className="mt-12 rounded-[28px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--paper-deep)_70%,white)] p-6 sm:p-8">
-        <h2 className="display text-3xl text-espresso">Dialling tips</h2>
+      <section className="mt-8 rounded-[1.75rem] border border-[var(--line)] bg-[color-mix(in_oklab,var(--paper-deep)_70%,white)] p-6 sm:p-8">
+        <h2 className="display text-3xl text-ink">Dialling tips</h2>
         <ul className="mt-4 grid gap-3 sm:grid-cols-3">
           {GRINDER.tips.map((tip) => (
             <li key={tip} className="text-sm leading-relaxed text-ink-soft">
@@ -49,6 +48,6 @@ export default function GrinderPage() {
           ))}
         </ul>
       </section>
-    </div>
+    </PageShell>
   );
 }

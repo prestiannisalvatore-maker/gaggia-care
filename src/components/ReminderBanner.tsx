@@ -14,8 +14,8 @@ export function ReminderBanner() {
   if (overdue.length === 0 && dueSoon.length === 0) return null;
 
   return (
-    <div className="border-b border-[var(--line)] bg-white">
-      <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6">
+    <div className="border-b border-[var(--line)] bg-[color-mix(in_oklab,var(--copper)_8%,white)]">
+      <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <p className="text-ink-soft">
           {overdue.length > 0 ? (
             <>
@@ -34,11 +34,8 @@ export function ReminderBanner() {
             <span className="text-steam"> · Reminders are off</span>
           ) : null}
         </p>
-        <Link
-          href="/maintenance"
-          className="font-semibold text-copper underline decoration-copper/30 underline-offset-4"
-        >
-          View calendar
+        <Link href="/maintenance" className="font-semibold text-copper">
+          Open Care →
         </Link>
       </div>
     </div>
