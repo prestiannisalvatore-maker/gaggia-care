@@ -10,7 +10,7 @@ export function PageIntro({
   return (
     <div className="fade-up max-w-3xl">
       <p className="text-xs uppercase tracking-[0.2em] text-steam">{eyebrow}</p>
-      <h1 className="display mt-3 text-[2rem] leading-tight text-espresso sm:text-5xl">
+      <h1 className="display mt-3 text-[2rem] leading-tight text-ink sm:text-5xl">
         {title}
       </h1>
       <p className="mt-4 text-base leading-relaxed text-ink-soft sm:text-lg">

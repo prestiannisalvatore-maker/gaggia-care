@@ -32,10 +32,25 @@ export type ReminderSettings = {
 
 export type TasteScore = 1 | 2 | 3 | 4 | 5;
 
+export type DrinkType =
+  | "espresso"
+  | "ristretto"
+  | "lungo"
+  | "doppio"
+  | "americano"
+  | "cappuccino"
+  | "latte"
+  | "flat_white"
+  | "macchiato"
+  | "cortado"
+  | "mocha"
+  | "other";
+
 export type EspressoRecipe = {
   id: string;
   createdAt: string;
   shotDate: string;
+  drinkType: DrinkType;
   beanBrand: string;
   beanName: string;
   roastDate: string;
@@ -43,6 +58,12 @@ export type EspressoRecipe = {
   doseGrams: number;
   yieldGrams: number;
   brewTimeSeconds: number;
+  /** Brew water / boiler brew temperature from PID (°C). Optional until PID is installed. */
+  brewTempC: number | null;
+  /** Steam temperature from PID (°C), if tracked. */
+  steamTempC: number | null;
+  /** PID offset or probe notes, e.g. “+1.5 °C offset”. */
+  pidNotes: string;
   tasteScore: TasteScore | null;
   tasteNotes: string;
   prepNotes: string;

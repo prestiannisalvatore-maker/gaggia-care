@@ -3,13 +3,15 @@
 import { useMemo, useState } from "react";
 import { formatDisplayDate } from "@/lib/dates";
 import {
+  DRINK_TYPES,
+  drinkTypeLabel,
   formatRatio,
   sortRecipesNewestFirst,
   tasteLabel,
   uniqueBeanBrands,
 } from "@/lib/recipes";
 import { useCare } from "@/lib/store";
-import type { EspressoRecipe } from "@/lib/types";
+import type { DrinkType, EspressoRecipe } from "@/lib/types";
 
 type RecipeTableProps = {
   onEdit: (recipe: EspressoRecipe) => void;
@@ -19,6 +21,7 @@ type RecipeTableProps = {
 export function RecipeTable({ onEdit, onRefine }: RecipeTableProps) {
   const { hydrated, state, deleteRecipe, toggleFavoriteRecipe } = useCare();
   const [brandFilter, setBrandFilter] = useState("all");
+  const [drinkFilter, setDrinkFilter] = useState<"all" | DrinkType>("all");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [query, setQuery] = useState("");
 
@@ -30,20 +33,23 @@ export function RecipeTable({ onEdit, onRefine }: RecipeTableProps) {
   const recipes = useMemo(() => {
     return sortRecipesNewestFirst(state.recipes).filter((recipe) => {
       if (brandFilter !== "all" && recipe.beanBrand !== brandFilter) return false;
+      if (drinkFilter !== "all" && recipe.drinkType !== drinkFilter) return false;
       if (favoritesOnly && !recipe.favorite) return false;
       if (!query.trim()) return true;
       const haystack = [
+        drinkTypeLabel(recipe.drinkType),
         recipe.beanBrand,
         recipe.beanName,
         recipe.grindSetting,
         recipe.tasteNotes,
         recipe.prepNotes,
+        recipe.pidNotes,
       ]
         .join(" ")
         .toLowerCase();
       return haystack.includes(query.trim().toLowerCase());
     });
-  }, [state.recipes, brandFilter, favoritesOnly, query]);
+  }, [state.recipes, brandFilter, drinkFilter, favoritesOnly, query]);
 
   const byId = useMemo(() => {
     return new Map(state.recipes.map((recipe) => [recipe.id, recipe]));
@@ -63,8 +69,8 @@ export function RecipeTable({ onEdit, onRefine }: RecipeTableProps) {
             Recipe recordings
           </h2>
           <p className="mt-2 max-w-2xl text-sm text-ink-soft">
-            Your experiment table — compare grind, dose, time, and yield, then
-            refine a promising row toward a superb espresso.
+            Compare drink type, grind, dose, time, yield, and temperature — then
+            refine a promising row.
           </p>
         </div>
         <p className="text-sm text-steam">
@@ -75,12 +81,26 @@ export function RecipeTable({ onEdit, onRefine }: RecipeTableProps) {
       <div className="mt-6 grid gap-3">
         <input
           type="search"
-          placeholder="Search brand, coffee, grind, notes…"
+          placeholder="Search drink, brand, coffee, grind, notes…"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           className="min-h-12 w-full rounded-2xl border border-[var(--line)] bg-white/80 px-4 py-3"
         />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <select
+            value={drinkFilter}
+            onChange={(event) =>
+              setDrinkFilter(event.target.value as "all" | DrinkType)
+            }
+            className="min-h-12 rounded-2xl border border-[var(--line)] bg-white/80 px-4 py-3"
+          >
+            <option value="all">All drinks</option>
+            {DRINK_TYPES.map((drink) => (
+              <option key={drink.id} value={drink.id}>
+                {drink.label}
+              </option>
+            ))}
+          </select>
           <select
             value={brandFilter}
             onChange={(event) => setBrandFilter(event.target.value)}
@@ -98,7 +118,7 @@ export function RecipeTable({ onEdit, onRefine }: RecipeTableProps) {
               type="checkbox"
               checked={favoritesOnly}
               onChange={(event) => setFavoritesOnly(event.target.checked)}
-              className="h-4 w-4 accent-[var(--espresso)]"
+              className="h-4 w-4 accent-[var(--ink)]"
             />
             Favorites only
           </label>
@@ -125,10 +145,11 @@ export function RecipeTable({ onEdit, onRefine }: RecipeTableProps) {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-xs uppercase tracking-[0.14em] text-steam">
+                        {drinkTypeLabel(recipe.drinkType)} ·{" "}
                         {formatDisplayDate(recipe.shotDate)}
                         {recipe.favorite ? " · Favorite" : ""}
                       </p>
-                      <h3 className="display mt-1 text-2xl text-espresso">
+                      <h3 className="display mt-1 text-2xl text-ink">
                         {recipe.beanBrand}
                       </h3>
                       {recipe.beanName ? (
@@ -169,23 +190,45 @@ export function RecipeTable({ onEdit, onRefine }: RecipeTableProps) {
                     </div>
                     <div>
                       <dt className="text-steam">Time</dt>
-                      <dd className="font-medium text-espresso">
+                      <dd className="font-medium text-ink">
                         {recipe.brewTimeSeconds}s
                       </dd>
                     </div>
+                    <div>
+                      <dt className="text-steam">Brew temp</dt>
+                      <dd className="font-medium text-ink">
+                        {recipe.brewTempC != null ? `${recipe.brewTempC}°C` : "—"}
+                      </dd>
+                    </div>
+                    {recipe.steamTempC != null ? (
+                      <div>
+                        <dt className="text-steam">Steam temp</dt>
+                        <dd className="font-medium text-ink">
+                          {recipe.steamTempC}°C
+                        </dd>
+                      </div>
+                    ) : null}
                     {recipe.roastDate ? (
                       <div>
                         <dt className="text-steam">Roast</dt>
-                        <dd className="font-medium text-espresso">
+                        <dd className="font-medium text-ink">
                           {formatDisplayDate(recipe.roastDate)}
                         </dd>
                       </div>
                     ) : null}
                   </dl>
 
-                  {recipe.tasteNotes || recipe.prepNotes || parent ? (
+                  {recipe.tasteNotes ||
+                  recipe.prepNotes ||
+                  recipe.pidNotes ||
+                  parent ? (
                     <div className="mt-3 space-y-1 text-sm text-ink-soft">
                       {recipe.tasteNotes ? <p>{recipe.tasteNotes}</p> : null}
+                      {recipe.pidNotes ? (
+                        <p className="text-xs text-steam">
+                          PID: {recipe.pidNotes}
+                        </p>
+                      ) : null}
                       {recipe.prepNotes ? (
                         <p className="text-xs text-steam">{recipe.prepNotes}</p>
                       ) : null}
@@ -241,19 +284,21 @@ export function RecipeTable({ onEdit, onRefine }: RecipeTableProps) {
           </div>
 
           <div className="mt-8 hidden overflow-x-auto rounded-[28px] border border-[var(--line)] bg-white/80 shadow-[var(--shadow)] md:block">
-            <table className="min-w-[980px] w-full border-collapse text-left text-sm">
+            <table className="min-w-[1080px] w-full border-collapse text-left text-sm">
               <thead className="bg-[color-mix(in_oklab,var(--paper-deep)_80%,white)] text-xs uppercase tracking-[0.14em] text-steam">
                 <tr>
-                  <th className="px-4 py-3 font-medium">Date</th>
-                  <th className="px-4 py-3 font-medium">Beans</th>
+                <th className="px-4 py-3 font-medium">Date</th>
+                <th className="px-4 py-3 font-medium">Drink</th>
+                <th className="px-4 py-3 font-medium">Beans</th>
                   <th className="px-4 py-3 font-medium">Grind</th>
                   <th className="px-4 py-3 font-medium">Dose</th>
                   <th className="px-4 py-3 font-medium">Yield</th>
                   <th className="px-4 py-3 font-medium">Ratio</th>
-                  <th className="px-4 py-3 font-medium">Time</th>
-                  <th className="px-4 py-3 font-medium">Taste</th>
-                  <th className="px-4 py-3 font-medium">Notes</th>
-                  <th className="px-4 py-3 font-medium">Actions</th>
+                <th className="px-4 py-3 font-medium">Time</th>
+                <th className="px-4 py-3 font-medium">Brew °C</th>
+                <th className="px-4 py-3 font-medium">Taste</th>
+                <th className="px-4 py-3 font-medium">Notes</th>
+                <th className="px-4 py-3 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -277,8 +322,11 @@ export function RecipeTable({ onEdit, onRefine }: RecipeTableProps) {
                           </div>
                         ) : null}
                       </td>
+                      <td className="px-4 py-4 font-medium text-ink">
+                        {drinkTypeLabel(recipe.drinkType)}
+                      </td>
                       <td className="px-4 py-4">
-                        <div className="font-medium text-espresso">
+                        <div className="font-medium text-ink">
                           {recipe.beanBrand}
                         </div>
                         {recipe.beanName ? (
@@ -300,16 +348,31 @@ export function RecipeTable({ onEdit, onRefine }: RecipeTableProps) {
                       </td>
                       <td className="px-4 py-4">{recipe.brewTimeSeconds}s</td>
                       <td className="px-4 py-4">
-                        <div className="font-medium text-espresso">
+                        {recipe.brewTempC != null ? `${recipe.brewTempC}°C` : "—"}
+                        {recipe.steamTempC != null ? (
+                          <div className="mt-1 text-xs text-steam">
+                            Steam {recipe.steamTempC}°C
+                          </div>
+                        ) : null}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="font-medium text-ink">
                           {recipe.tasteScore
                             ? `${recipe.tasteScore} · ${tasteLabel(recipe.tasteScore)}`
                             : "—"}
                         </div>
                       </td>
                       <td className="max-w-[220px] px-4 py-4 text-ink-soft">
-                        {recipe.tasteNotes || recipe.prepNotes ? (
+                        {recipe.tasteNotes ||
+                        recipe.prepNotes ||
+                        recipe.pidNotes ? (
                           <div className="space-y-1">
                             {recipe.tasteNotes ? <p>{recipe.tasteNotes}</p> : null}
+                            {recipe.pidNotes ? (
+                              <p className="text-xs text-steam">
+                                PID: {recipe.pidNotes}
+                              </p>
+                            ) : null}
                             {recipe.prepNotes ? (
                               <p className="text-xs text-steam">
                                 {recipe.prepNotes}

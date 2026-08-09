@@ -1,5 +1,4 @@
 import { MANUAL_CLEANING } from "@/data/cleaning";
-import { ManualReference } from "@/components/ManualReference";
 
 export function ManualCleaningGuide() {
   return (
@@ -9,17 +8,13 @@ export function ManualCleaningGuide() {
           <p className="text-xs uppercase tracking-[0.2em] text-steam">
             From the official manual · pp. {MANUAL_CLEANING.pages}
           </p>
-          <h2 className="display mt-2 text-4xl text-espresso">
+          <h2 className="display mt-2 text-3xl text-ink sm:text-4xl">
             {MANUAL_CLEANING.chapter}
           </h2>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-ink-soft">
             {MANUAL_CLEANING.intro}
           </p>
         </div>
-      </div>
-
-      <div className="mt-6">
-        <ManualReference variant="compact" />
       </div>
 
       <div className="mt-10 space-y-8">

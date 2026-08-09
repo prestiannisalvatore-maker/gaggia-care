@@ -1,4 +1,32 @@
-import type { EspressoRecipe } from "@/lib/types";
+import type { DrinkType, EspressoRecipe } from "@/lib/types";
+
+export const DRINK_TYPES: Array<{ id: DrinkType; label: string }> = [
+  { id: "espresso", label: "Espresso" },
+  { id: "ristretto", label: "Ristretto" },
+  { id: "lungo", label: "Lungo" },
+  { id: "doppio", label: "Doppio" },
+  { id: "americano", label: "Americano" },
+  { id: "cappuccino", label: "Cappuccino" },
+  { id: "latte", label: "Caffè latte" },
+  { id: "flat_white", label: "Flat white" },
+  { id: "macchiato", label: "Macchiato" },
+  { id: "cortado", label: "Cortado" },
+  { id: "mocha", label: "Mocha" },
+  { id: "other", label: "Other" },
+];
+
+const DRINK_LABELS = Object.fromEntries(
+  DRINK_TYPES.map((drink) => [drink.id, drink.label]),
+) as Record<DrinkType, string>;
+
+export function isDrinkType(value: unknown): value is DrinkType {
+  return typeof value === "string" && value in DRINK_LABELS;
+}
+
+export function drinkTypeLabel(type: DrinkType | null | undefined): string {
+  if (!type) return "Espresso";
+  return DRINK_LABELS[type] ?? "Espresso";
+}
 
 export function brewRatio(doseGrams: number, yieldGrams: number): number | null {
   if (!doseGrams || doseGrams <= 0 || !yieldGrams || yieldGrams <= 0) return null;

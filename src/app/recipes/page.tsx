@@ -53,7 +53,7 @@ export default function RecipesPage() {
       <PageIntro
         eyebrow="Dialling-in"
         title="Espresso recipes"
-        description="Capture each shot’s bean brand, grind setting, dose, brew time, and yield. Build a table of recordings, then refine promising baselines until the espresso tastes superb."
+        description="Capture drink type (espresso, ristretto, cappuccino, and more), bean brand, grind, dose, brew time, yield, and PID temperature when installed — then refine toward a superb cup."
       />
 
       <div className="fade-up-delay mt-10">

@@ -9,7 +9,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { createRecipeId } from "@/lib/recipes";
+import { createRecipeId, isDrinkType } from "@/lib/recipes";
 import { computeTasks } from "@/lib/schedule";
 import { todayISO } from "@/lib/dates";
 import type {
@@ -66,7 +66,15 @@ function readStorage(): AppState {
         ...parsed.reminders,
       },
       completions: parsed.completions ?? [],
-      recipes: parsed.recipes ?? [],
+      recipes: (parsed.recipes ?? []).map((recipe) => ({
+        ...recipe,
+        drinkType: isDrinkType(recipe.drinkType) ? recipe.drinkType : "espresso",
+        brewTempC:
+          typeof recipe.brewTempC === "number" ? recipe.brewTempC : null,
+        steamTempC:
+          typeof recipe.steamTempC === "number" ? recipe.steamTempC : null,
+        pidNotes: recipe.pidNotes ?? "",
+      })),
     };
   } catch {
     return DEFAULT_STATE;

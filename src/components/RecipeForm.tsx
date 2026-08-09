@@ -1,14 +1,20 @@
 "use client";
 
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
-import { formatRatio } from "@/lib/recipes";
+import { DRINK_TYPES, drinkTypeLabel, formatRatio } from "@/lib/recipes";
 import { todayISO } from "@/lib/dates";
 import { useCare } from "@/lib/store";
-import type { EspressoRecipe, EspressoRecipeInput, TasteScore } from "@/lib/types";
+import type {
+  DrinkType,
+  EspressoRecipe,
+  EspressoRecipeInput,
+  TasteScore,
+} from "@/lib/types";
 
 export function emptyRecipeForm(): EspressoRecipeInput {
   return {
     shotDate: todayISO(),
+    drinkType: "espresso",
     beanBrand: "",
     beanName: "",
     roastDate: "",
@@ -16,6 +22,9 @@ export function emptyRecipeForm(): EspressoRecipeInput {
     doseGrams: 18,
     yieldGrams: 36,
     brewTimeSeconds: 28,
+    brewTempC: null,
+    steamTempC: null,
+    pidNotes: "",
     tasteScore: null,
     tasteNotes: "",
     prepNotes: "",
@@ -27,6 +36,7 @@ export function emptyRecipeForm(): EspressoRecipeInput {
 export function recipeToInput(recipe: EspressoRecipe): EspressoRecipeInput {
   return {
     shotDate: recipe.shotDate,
+    drinkType: recipe.drinkType ?? "espresso",
     beanBrand: recipe.beanBrand,
     beanName: recipe.beanName,
     roastDate: recipe.roastDate,
@@ -34,6 +44,9 @@ export function recipeToInput(recipe: EspressoRecipe): EspressoRecipeInput {
     doseGrams: recipe.doseGrams,
     yieldGrams: recipe.yieldGrams,
     brewTimeSeconds: recipe.brewTimeSeconds,
+    brewTempC: recipe.brewTempC ?? null,
+    steamTempC: recipe.steamTempC ?? null,
+    pidNotes: recipe.pidNotes ?? "",
     tasteScore: recipe.tasteScore,
     tasteNotes: recipe.tasteNotes,
     prepNotes: recipe.prepNotes,
@@ -114,11 +127,24 @@ export function RecipeForm({
       return;
     }
 
+    if (form.brewTempC != null && (form.brewTempC < 70 || form.brewTempC > 130)) {
+      setError("Brew water temperature should be between 70°C and 130°C.");
+      return;
+    }
+    if (
+      form.steamTempC != null &&
+      (form.steamTempC < 100 || form.steamTempC > 160)
+    ) {
+      setError("Steam temperature should be between 100°C and 160°C.");
+      return;
+    }
+
     const payload: EspressoRecipeInput = {
       ...form,
       beanBrand: form.beanBrand.trim(),
       beanName: form.beanName.trim(),
       grindSetting: form.grindSetting.trim(),
+      pidNotes: form.pidNotes.trim(),
       tasteNotes: form.tasteNotes.trim(),
       prepNotes: form.prepNotes.trim(),
     };
@@ -143,25 +169,47 @@ export function RecipeForm({
           </p>
           <h2 className="display mt-2 text-3xl text-espresso">{modeLabel}</h2>
           <p className="mt-2 max-w-2xl text-sm text-ink-soft">
-            Record grind, dose, brew time, and yield. Change one variable at a
-            time when refining toward a superb cup.
+            Record grind, dose, brew time, yield, and PID temperatures when you
+            have them. Change one variable at a time when refining.
           </p>
         </div>
         <p className="text-sm text-steam">
-          Ratio <span className="font-medium text-espresso">{ratio}</span>
+          Ratio <span className="font-medium text-ink">{ratio}</span>
         </p>
       </div>
 
       {mode === "refine" && sourceRecipe ? (
         <p className="mt-4 rounded-2xl bg-[color-mix(in_oklab,var(--copper)_12%,white)] px-4 py-3 text-sm text-ink-soft">
-          Starting from {sourceRecipe.beanBrand}
+          Starting from {drinkTypeLabel(sourceRecipe.drinkType)} ·{" "}
+          {sourceRecipe.beanBrand}
           {sourceRecipe.beanName ? ` · ${sourceRecipe.beanName}` : ""} · grind{" "}
           {sourceRecipe.grindSetting} · {sourceRecipe.doseGrams}g in /{" "}
           {sourceRecipe.yieldGrams}g out · {sourceRecipe.brewTimeSeconds}s
+          {sourceRecipe.brewTempC != null
+            ? ` · ${sourceRecipe.brewTempC}°C brew`
+            : ""}
         </p>
       ) : null}
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
+        <Field label="Drink type" htmlFor="drinkType">
+          <select
+            id="drinkType"
+            required
+            value={form.drinkType}
+            onChange={(event) =>
+              update("drinkType", event.target.value as DrinkType)
+            }
+            className={inputClass}
+          >
+            {DRINK_TYPES.map((drink) => (
+              <option key={drink.id} value={drink.id}>
+                {drink.label}
+              </option>
+            ))}
+          </select>
+        </Field>
+
         <Field label="Shot date" htmlFor="shotDate">
           <input
             id="shotDate"
@@ -294,10 +342,77 @@ export function RecipeForm({
             type="checkbox"
             checked={form.favorite}
             onChange={(event) => update("favorite", event.target.checked)}
-            className="h-4 w-4 accent-[var(--espresso)]"
+            className="h-4 w-4 accent-[var(--ink)]"
           />
           Mark as a keeper / favorite
         </label>
+      </div>
+
+      <div className="mt-8 rounded-2xl border border-[var(--line)] bg-paper/80 p-4 sm:p-5">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.16em] text-steam">
+              PID temperatures
+            </p>
+            <p className="mt-1 text-sm text-ink-soft">
+              Optional until your PID is installed. Leave blank for now, then
+              log brew water temperature on each shot.
+            </p>
+          </div>
+        </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <Field label="Brew water temp (°C)" htmlFor="brewTempC">
+            <input
+              id="brewTempC"
+              type="number"
+              min={70}
+              max={130}
+              step={0.1}
+              placeholder="e.g. 93.0"
+              value={form.brewTempC ?? ""}
+              onChange={(event) =>
+                update(
+                  "brewTempC",
+                  event.target.value === ""
+                    ? null
+                    : Number(event.target.value),
+                )
+              }
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Steam temp (°C)" htmlFor="steamTempC">
+            <input
+              id="steamTempC"
+              type="number"
+              min={100}
+              max={160}
+              step={0.1}
+              placeholder="Optional"
+              value={form.steamTempC ?? ""}
+              onChange={(event) =>
+                update(
+                  "steamTempC",
+                  event.target.value === ""
+                    ? null
+                    : Number(event.target.value),
+                )
+              }
+              className={inputClass}
+            />
+          </Field>
+          <div className="sm:col-span-2">
+            <Field label="PID notes" htmlFor="pidNotes">
+              <input
+                id="pidNotes"
+                placeholder="Offset, probe location, brew vs idle setpoint…"
+                value={form.pidNotes}
+                onChange={(event) => update("pidNotes", event.target.value)}
+                className={inputClass}
+              />
+            </Field>
+          </div>
+        </div>
       </div>
 
       <div className="mt-4 grid gap-4">
@@ -328,7 +443,7 @@ export function RecipeForm({
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <button
           type="submit"
-          className="min-h-12 rounded-full bg-espresso px-5 py-3 text-sm font-medium text-paper transition hover:bg-copper-deep"
+          className="min-h-12 rounded-xl bg-ink px-5 py-3 text-sm font-medium text-paper transition hover:bg-copper-deep"
         >
           {mode === "edit"
             ? "Save changes"

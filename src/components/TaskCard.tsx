@@ -49,7 +49,7 @@ export function TaskCard({ task }: { task: ComputedTask }) {
           <button
             type="button"
             onClick={() => completeTask(task.id)}
-            className="min-h-11 rounded-full bg-espresso px-4 py-2.5 text-sm font-medium text-paper transition hover:bg-copper-deep"
+            className="min-h-11 rounded-xl bg-ink px-4 py-2.5 text-sm font-medium text-paper transition hover:bg-copper-deep"
           >
             Mark done
           </button>

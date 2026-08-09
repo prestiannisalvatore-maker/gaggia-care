@@ -1,48 +1,36 @@
-import Image from "next/image";
 import Link from "next/link";
 import { HomeDashboard } from "@/components/HomeDashboard";
 
 export default function Home() {
   return (
     <>
-      <section className="relative isolate min-h-[100svh] overflow-hidden bg-espresso text-paper">
-        <Image
-          src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=2400&q=80"
-          alt="Fresh espresso poured into a demitasse"
-          fill
-          priority
-          className="object-cover object-center"
-          sizes="100vw"
-        />
-        <div className="hero-veil absolute inset-0" />
-        <div className="grain absolute inset-0" />
-
-        <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-end px-4 pb-24 pt-24 sm:px-6 sm:pb-20 sm:pt-28">
-          <div className="fade-up max-w-2xl">
-            <p className="text-xs uppercase tracking-[0.22em] text-paper/70">
-              Home barista companion
+      <section className="border-b border-[var(--line)] bg-[linear-gradient(180deg,#f7f8fa_0%,#eef1f4_100%)]">
+        <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-12 sm:px-6 sm:py-16 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <p className="text-xs uppercase tracking-[0.18em] text-steam">
+              Classic E24 · August 2026
             </p>
-            <h1 className="display mt-4 text-[2.75rem] leading-[0.95] sm:text-7xl">
+            <h1 className="display mt-3 text-5xl leading-[0.95] text-ink sm:text-6xl">
               Gaggia Care
             </h1>
-            <p className="fade-up-delay mt-5 max-w-lg text-base leading-relaxed text-paper/80 sm:text-lg">
-              Maintenance, descaling, and daily ritual for your Classic E24 —
-              purchased August 2026 — plus the HiBREW 5G and the tools beside it.
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-ink-soft sm:text-lg">
+              A clear calendar for machine care, official descaling steps, and a
+              place to refine espresso recipes until they taste superb.
             </p>
-            <div className="fade-up-delay-2 mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
-              <Link
-                href="/maintenance"
-                className="inline-flex min-h-12 items-center justify-center rounded-full bg-paper px-5 py-3 text-sm font-medium text-espresso transition hover:bg-white"
-              >
-                View maintenance calendar
-              </Link>
-              <Link
-                href="/recipes"
-                className="inline-flex min-h-12 items-center justify-center rounded-full border border-paper/35 px-5 py-3 text-sm font-medium text-paper transition hover:bg-paper/10"
-              >
-                Log espresso recipes
-              </Link>
-            </div>
+          </div>
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+            <Link
+              href="/maintenance"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-ink px-5 text-sm font-medium text-paper"
+            >
+              Open calendar
+            </Link>
+            <Link
+              href="/recipes"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[var(--line)] bg-white px-5 text-sm font-medium text-ink"
+            >
+              Log a recipe
+            </Link>
           </div>
         </div>
       </section>
