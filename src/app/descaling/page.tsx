@@ -6,7 +6,7 @@ import { DESCALING_GUIDE } from "@/data/descaling";
 
 export default function DescalingPage() {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
       <PageIntro
         eyebrow="Primary maintenance"
         title={DESCALING_GUIDE.title}
@@ -17,11 +17,11 @@ export default function DescalingPage() {
         {DESCALING_GUIDE.intervalNote}
       </p>
 
-      <div className="fade-up-delay mt-8 flex flex-wrap gap-3">
+      <div className="fade-up-delay mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <DescaleCompleteButton />
         <Link
           href="/maintenance"
-          className="rounded-full border border-[var(--line)] px-5 py-3 text-sm font-medium text-ink-soft transition hover:bg-mist/60"
+          className="inline-flex min-h-12 items-center justify-center rounded-full border border-[var(--line)] px-5 py-3 text-sm font-medium text-ink-soft transition hover:bg-mist/60"
         >
           Back to calendar
         </Link>

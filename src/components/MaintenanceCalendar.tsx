@@ -6,7 +6,8 @@ import { getCalendarCells, monthLabel, todayISO } from "@/lib/dates";
 import { monthDueMap } from "@/lib/schedule";
 import { useCare } from "@/lib/store";
 
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
+const WEEKDAYS_FULL = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export function MaintenanceCalendar() {
   const { tasks } = useCare();
@@ -31,16 +32,16 @@ export function MaintenanceCalendar() {
   const selectedTasks = dueMap[selected] ?? [];
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+    <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:gap-8">
       <div>
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 className="display text-3xl text-espresso">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="display text-2xl text-espresso sm:text-3xl">
             {monthLabel(cursor.year, cursor.month)}
           </h2>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-3 gap-2 sm:flex">
             <button
               type="button"
-              className="rounded-full border border-[var(--line)] px-3 py-1.5 text-sm hover:bg-mist/60"
+              className="min-h-11 rounded-full border border-[var(--line)] px-3 py-2 text-sm hover:bg-mist/60"
               onClick={() =>
                 setCursor((prev) => {
                   const date = new Date(prev.year, prev.month - 1, 1);
@@ -52,7 +53,7 @@ export function MaintenanceCalendar() {
             </button>
             <button
               type="button"
-              className="rounded-full border border-[var(--line)] px-3 py-1.5 text-sm hover:bg-mist/60"
+              className="min-h-11 rounded-full border border-[var(--line)] px-3 py-2 text-sm hover:bg-mist/60"
               onClick={() =>
                 setCursor({
                   year: initial.getFullYear(),
@@ -64,7 +65,7 @@ export function MaintenanceCalendar() {
             </button>
             <button
               type="button"
-              className="rounded-full border border-[var(--line)] px-3 py-1.5 text-sm hover:bg-mist/60"
+              className="min-h-11 rounded-full border border-[var(--line)] px-3 py-2 text-sm hover:bg-mist/60"
               onClick={() =>
                 setCursor((prev) => {
                   const date = new Date(prev.year, prev.month + 1, 1);
@@ -77,10 +78,11 @@ export function MaintenanceCalendar() {
           </div>
         </div>
 
-        <div className="grid grid-cols-7 gap-1 text-center text-xs uppercase tracking-[0.14em] text-steam">
-          {WEEKDAYS.map((day) => (
-            <div key={day} className="py-2">
-              {day}
+        <div className="grid grid-cols-7 gap-1 text-center text-[11px] uppercase tracking-[0.12em] text-steam sm:text-xs sm:tracking-[0.14em]">
+          {WEEKDAYS.map((day, index) => (
+            <div key={`${day}-${index}`} className="py-2">
+              <span className="sm:hidden">{day}</span>
+              <span className="hidden sm:inline">{WEEKDAYS_FULL[index]}</span>
             </div>
           ))}
         </div>
@@ -88,7 +90,12 @@ export function MaintenanceCalendar() {
         <div className="grid grid-cols-7 gap-1">
           {cells.map((cell, index) => {
             if (!cell.iso || cell.day === null) {
-              return <div key={`empty-${index}`} className="min-h-20" />;
+              return (
+                <div
+                  key={`empty-${index}`}
+                  className="min-h-11 sm:min-h-16 lg:min-h-20"
+                />
+              );
             }
 
             const due = dueMap[cell.iso] ?? [];
@@ -102,13 +109,13 @@ export function MaintenanceCalendar() {
                 key={cell.iso}
                 type="button"
                 onClick={() => setSelected(cell.iso!)}
-                className={`min-h-20 rounded-2xl border p-2 text-left transition ${
+                className={`flex min-h-11 flex-col items-center justify-start rounded-xl border p-1.5 text-left transition sm:min-h-16 sm:items-stretch sm:rounded-2xl sm:p-2 lg:min-h-20 ${
                   isSelected
                     ? "border-espresso bg-espresso text-paper"
                     : "border-transparent bg-white/50 hover:border-mist hover:bg-white/80"
                 }`}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex w-full items-center justify-center gap-1 sm:justify-between">
                   <span
                     className={`text-sm font-medium ${
                       isToday && !isSelected ? "text-copper" : ""
@@ -118,7 +125,7 @@ export function MaintenanceCalendar() {
                   </span>
                   {due.length > 0 ? (
                     <span
-                      className={`h-2 w-2 rounded-full ${
+                      className={`h-1.5 w-1.5 rounded-full sm:h-2 sm:w-2 ${
                         hasOverdue
                           ? "bg-danger"
                           : hasDueSoon
@@ -131,7 +138,7 @@ export function MaintenanceCalendar() {
                   ) : null}
                 </div>
                 <div
-                  className={`mt-2 space-y-1 text-[10px] leading-tight ${
+                  className={`mt-1 hidden space-y-1 text-[10px] leading-tight sm:block ${
                     isSelected ? "text-paper/80" : "text-ink-soft"
                   }`}
                 >
@@ -148,12 +155,14 @@ export function MaintenanceCalendar() {
         </div>
       </div>
 
-      <aside className="rounded-[28px] border border-[var(--line)] bg-white/70 p-6 shadow-[var(--shadow)]">
+      <aside className="rounded-[24px] border border-[var(--line)] bg-white/70 p-5 shadow-[var(--shadow)] sm:rounded-[28px] sm:p-6">
         <p className="text-xs uppercase tracking-[0.18em] text-steam">
           Selected day
         </p>
-        <h3 className="display mt-2 text-3xl text-espresso">{selected}</h3>
-        <div className="mt-6 space-y-4">
+        <h3 className="display mt-2 text-2xl text-espresso sm:text-3xl">
+          {selected}
+        </h3>
+        <div className="mt-5 space-y-4 sm:mt-6">
           {selectedTasks.length === 0 ? (
             <p className="text-sm leading-relaxed text-ink-soft">
               No scheduled maintenance due on this day. Daily wipe-downs and
@@ -161,12 +170,17 @@ export function MaintenanceCalendar() {
             </p>
           ) : (
             selectedTasks.map((task) => (
-              <div key={task.id} className="border-t border-[var(--line)] pt-4 first:border-t-0 first:pt-0">
+              <div
+                key={task.id}
+                className="border-t border-[var(--line)] pt-4 first:border-t-0 first:pt-0"
+              >
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="font-medium text-espresso">{task.title}</p>
                   <StatusPill status={task.status} />
                 </div>
-                <p className="mt-1 text-sm text-ink-soft">{task.frequencyLabel}</p>
+                <p className="mt-1 text-sm text-ink-soft">
+                  {task.frequencyLabel}
+                </p>
               </div>
             ))
           )}

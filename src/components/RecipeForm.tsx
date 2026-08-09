@@ -325,10 +325,10 @@ export function RecipeForm({
 
       {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
 
-      <div className="mt-6 flex flex-wrap gap-3">
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <button
           type="submit"
-          className="rounded-full bg-espresso px-5 py-3 text-sm font-medium text-paper transition hover:bg-copper-deep"
+          className="min-h-12 rounded-full bg-espresso px-5 py-3 text-sm font-medium text-paper transition hover:bg-copper-deep"
         >
           {mode === "edit"
             ? "Save changes"
@@ -340,7 +340,7 @@ export function RecipeForm({
           <button
             type="button"
             onClick={onDone}
-            className="rounded-full border border-[var(--line)] px-5 py-3 text-sm text-ink-soft transition hover:bg-mist/60"
+            className="min-h-12 rounded-full border border-[var(--line)] px-5 py-3 text-sm text-ink-soft transition hover:bg-mist/60"
           >
             Cancel
           </button>
@@ -368,4 +368,4 @@ function Field({
 }
 
 const inputClass =
-  "w-full rounded-2xl border border-[var(--line)] bg-paper px-4 py-3 text-sm text-ink outline-none transition focus:border-copper";
+  "min-h-12 w-full rounded-2xl border border-[var(--line)] bg-paper px-4 py-3 text-ink outline-none transition focus:border-copper";

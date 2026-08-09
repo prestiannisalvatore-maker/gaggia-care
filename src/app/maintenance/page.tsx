@@ -24,7 +24,7 @@ export default function MaintenancePage() {
   );
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
       <PageIntro
         eyebrow="Lifecycle care"
         title="Cleaning and maintenance"
@@ -55,7 +55,7 @@ export default function MaintenancePage() {
             ? "Due dates roll forward from your purchase date and each time you mark a task done."
             : "Loading saved progress…"}
         </p>
-        <div className="mt-6 rounded-[28px] border border-[var(--line)] bg-white/70 px-6 py-2 shadow-[var(--shadow)]">
+        <div className="mt-6 rounded-[24px] border border-[var(--line)] bg-white/70 px-4 py-2 shadow-[var(--shadow)] sm:rounded-[28px] sm:px-6">
           {scheduled.map((task) => (
             <TaskCard key={task.id} task={task} />
           ))}
@@ -70,7 +70,7 @@ export default function MaintenancePage() {
           These match manual instructions that are not on a fixed calendar
           interval — after frothing, regularly, or when required.
         </p>
-        <div className="mt-6 rounded-[28px] border border-[var(--line)] bg-white/70 px-6 py-2">
+        <div className="mt-6 rounded-[24px] border border-[var(--line)] bg-white/70 px-4 py-2 sm:rounded-[28px] sm:px-6">
           {sessionTasks.map((task) => (
             <TaskCard key={task.id} task={task} />
           ))}
@@ -85,7 +85,7 @@ export default function MaintenancePage() {
           Extra care items for your HiBREW 5G and bar tools. These are not part
           of the Gaggia E24 manual.
         </p>
-        <div className="mt-6 rounded-[28px] border border-[var(--line)] bg-white/70 px-6 py-2">
+        <div className="mt-6 rounded-[24px] border border-[var(--line)] bg-white/70 px-4 py-2 sm:rounded-[28px] sm:px-6">
           {otherTasks.map((task) => (
             <TaskCard key={task.id} task={task} />
           ))}

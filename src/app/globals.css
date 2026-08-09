@@ -17,6 +17,7 @@
   --shadow: 0 24px 60px color-mix(in oklab, var(--espresso) 18%, transparent);
   --background: var(--paper);
   --foreground: var(--ink);
+  --mobile-nav-space: calc(5.25rem + env(safe-area-inset-bottom));
 }
 
 @theme inline {
@@ -44,6 +45,7 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -71,6 +73,24 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+/* Prevent iOS zoom-on-focus and improve touch targets */
+input,
+textarea,
+select,
+button {
+  font-size: 16px;
+  touch-action: manipulation;
+}
+
+@media (min-width: 640px) {
+  input,
+  textarea,
+  select,
+  button {
+    font-size: inherit;
+  }
 }
 
 .display {
@@ -145,6 +165,20 @@ select {
       transparent 40%,
       color-mix(in oklab, var(--espresso) 75%, black) 100%
     );
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  body {
+    padding-bottom: var(--mobile-nav-space);
+  }
 }
 
 @media (max-width: 768px) {

@@ -45,11 +45,11 @@ export function TaskCard({ task }: { task: ComputedTask }) {
           ) : null}
         </div>
 
-        <div className="flex shrink-0 flex-wrap gap-2">
+        <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
           <button
             type="button"
             onClick={() => completeTask(task.id)}
-            className="rounded-full bg-espresso px-4 py-2 text-sm font-medium text-paper transition hover:bg-copper-deep"
+            className="min-h-11 rounded-full bg-espresso px-4 py-2.5 text-sm font-medium text-paper transition hover:bg-copper-deep"
           >
             Mark done
           </button>
@@ -57,7 +57,7 @@ export function TaskCard({ task }: { task: ComputedTask }) {
             <button
               type="button"
               onClick={() => undoLastCompletion(task.id)}
-              className="rounded-full border border-[var(--line)] px-4 py-2 text-sm text-ink-soft transition hover:bg-mist/60"
+              className="min-h-11 rounded-full border border-[var(--line)] px-4 py-2.5 text-sm text-ink-soft transition hover:bg-mist/60"
             >
               Undo
             </button>

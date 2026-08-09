@@ -18,7 +18,7 @@ export function HomeDashboard() {
     .sort((a, b) => (a.nextDue ?? "").localeCompare(b.nextDue ?? ""))[0];
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+    <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-steam">

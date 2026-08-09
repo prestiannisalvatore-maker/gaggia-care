@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Figtree, Instrument_Serif } from "next/font/google";
 import { ManualReference } from "@/components/ManualReference";
 import { ReminderBanner } from "@/components/ReminderBanner";
@@ -21,6 +21,21 @@ export const metadata: Metadata = {
   title: "Gaggia Care · Classic E24",
   description:
     "Maintenance companion for the Gaggia Classic E24, HiBREW 5G grinder, and barista accessories — schedules, descaling guidance, and reminders.",
+  appleWebApp: {
+    capable: true,
+    title: "Gaggia Care",
+    statusBarStyle: "default",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#eef1f4",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

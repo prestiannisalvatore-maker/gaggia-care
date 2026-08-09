@@ -4,7 +4,7 @@ import { ACCESSORIES } from "@/data/accessories";
 
 export default function AccessoriesPage() {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
       <PageIntro
         eyebrow="Bar kit"
         title="Accessories"
@@ -20,11 +20,11 @@ export default function AccessoriesPage() {
         </Link>
       </div>
 
-      <section className="mt-12 divide-y divide-[var(--line)] rounded-[28px] border border-[var(--line)] bg-white/70 px-6 shadow-[var(--shadow)]">
+      <section className="mt-10 divide-y divide-[var(--line)] rounded-[24px] border border-[var(--line)] bg-white/70 px-4 shadow-[var(--shadow)] sm:mt-12 sm:rounded-[28px] sm:px-6">
         {ACCESSORIES.map((item) => (
-          <article key={item.id} className="grid gap-3 py-6 sm:grid-cols-[0.9fr_1.2fr_0.7fr] sm:gap-6">
+          <article key={item.id} className="grid gap-3 py-5 sm:grid-cols-[0.9fr_1.2fr_0.7fr] sm:gap-6 sm:py-6">
             <div>
-              <h2 className="display text-3xl text-espresso">{item.name}</h2>
+              <h2 className="display text-2xl text-espresso sm:text-3xl">{item.name}</h2>
               <p className="mt-2 text-xs uppercase tracking-[0.16em] text-steam">
                 {item.frequency}
               </p>

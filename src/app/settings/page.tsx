@@ -16,7 +16,7 @@ export default function SettingsPage() {
   const [permission, setPermission] = useState<string>("unknown");
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
       <PageIntro
         eyebrow="Reminders & data"
         title="Stay ahead of scale and milk"
